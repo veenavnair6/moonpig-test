@@ -1,35 +1,42 @@
 ﻿namespace Moonpig.PostOffice.Api.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Data;
     using Microsoft.AspNetCore.Mvc;
     using Model;
+    using Moonpig.PostOffice.Service.Abstractions;
+    using System;
+    using System.Collections.Generic;
 
+    /// <summary>
+    /// The depatch date controller class.
+    /// </summary>
     [Route("api/[controller]")]
     public class DespatchDateController : Controller
     {
-        public DateTime _mlt;
+        /// <summary>
+        /// The service methods related to product model.
+        /// </summary>
+        private IProductService _productService;
 
-        [HttpGet]
-        public DespatchDate Get(List<int> productIds, DateTime orderDate)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DespatchDateController"/> class.
+        /// </summary>
+        /// <param name="productService">The product service.</param>
+        public DespatchDateController(IProductService productService)
         {
-            _mlt = orderDate; // max lead time
-            foreach (var ID in productIds)
-            {
-                DbContext dbContext = new DbContext();
-                var s = dbContext.Products.Single(x => x.ProductId == ID).SupplierId;
-                var lt = dbContext.Suppliers.Single(x => x.SupplierId == s).LeadTime;
-                if (orderDate.AddDays(lt) > _mlt)
-                    _mlt = orderDate.AddDays(lt);
-            }
-            if (_mlt.DayOfWeek == DayOfWeek.Saturday)
-            {
-                return new DespatchDate { Date = _mlt.AddDays(2) };
-            }
-            else if (_mlt.DayOfWeek == DayOfWeek.Sunday) return new DespatchDate { Date = _mlt.AddDays(1) };
-            else return new DespatchDate { Date = _mlt };
+            _productService = productService;
+        }
+
+        /// <summary>
+        /// The get method for finding despatch date of order.
+        /// </summary>
+        /// <param name="productIds">The products in an order represented by Ids</param>
+        /// <param name="orderDate">The date of order</param>
+        /// <returns>The despatch date.</returns>
+        [HttpGet]
+        public IActionResult Get(List<int> productIds, DateTime orderDate)
+        {
+            var _mlt = _productService.GetDespatchdate(productIds, orderDate);
+            return Ok(new DespatchDate { Date = _mlt });
         }
     }
 }
