@@ -35,8 +35,16 @@
         [HttpGet]
         public IActionResult Get(List<int> productIds, DateTime orderDate)
         {
-            var _mlt = _productService.GetDespatchdate(productIds, orderDate);
-            return Ok(new DespatchDate { Date = _mlt });
+            try
+            {
+                var _mlt = _productService.GetDespatchdate(productIds, orderDate);
+                return Ok(new DespatchDate { Date = _mlt });
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500);
+            }
         }
     }
 }
+

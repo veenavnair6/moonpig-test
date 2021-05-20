@@ -36,25 +36,27 @@
             return highestLd.Max();
         }
 
-        public DateTime GetDespatchdate(List<int> productIds, DateTime orderDate)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="productIds"></param>
+        /// <param name="date"></param>
+        /// <returns></returns>
+        public DateTime GetDespatchdate(List<int> productIds, DateTime date)
         {
             var highestLeadTime = GetHighestLeadTime(productIds);
-            if (highestLeadTime >= 0)
+           
+            while (highestLeadTime > 0)
             {
-                DateTime _mlt = orderDate.AddDays(highestLeadTime); // max lead time
-                if (_mlt.DayOfWeek == DayOfWeek.Saturday)
-                {
-                    return _mlt.AddDays(2);
-                }
-                else if (_mlt.DayOfWeek == DayOfWeek.Sunday) return _mlt.AddDays(1);
-                else return _mlt;
-            }
-            else
-            {
-                throw new ArgumentException();
-            }
-        }
+                date = date.AddDays(1);
 
+                if (date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
+                {
+                    highestLeadTime -= 1;
+                }
+            }
+            return date;
+        }
 
     }
 }
